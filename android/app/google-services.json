@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "764443138768",
+    "project_id": "mini-98b04",
+    "storage_bucket": "mini-98b04.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:764443138768:android:384ceb9c9d8abae2255cd5",
+        "android_client_info": {
+          "package_name": "com.example.chpsmamacare_main01"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOPOTXtKYtggpijizW-XNNo928Q_e8qPA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
