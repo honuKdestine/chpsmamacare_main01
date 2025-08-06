@@ -98,7 +98,7 @@ class NotificationService {
     );
 
     final notificationTime = scheduleDate.isBefore(now)
-        ? scheduleDate.add(const Duration(minutes: 2))
+        ? scheduleDate.add(const Duration(days: 1))
         : scheduleDate;
 
     // Use BigPictureStyleInformation with drawable resource
@@ -141,11 +141,11 @@ class NotificationService {
 
   void scheduleHealthTipNotifications() {
     final times = [
-      const TimeOfDay(hour: 8, minute: 00),
-      const TimeOfDay(hour: 12, minute: 25),
-      const TimeOfDay(hour: 12, minute: 30),
-      const TimeOfDay(hour: 3, minute: 00),
-      const TimeOfDay(hour: 5, minute: 00),
+      const TimeOfDay(hour: 0, minute: 58),
+      const TimeOfDay(hour: 11, minute: 0),
+      const TimeOfDay(hour: 13, minute: 0),
+      const TimeOfDay(hour: 21, minute: 0),
+      const TimeOfDay(hour: 19, minute: 15),
     ];
 
     // Randomize or rotate tips
