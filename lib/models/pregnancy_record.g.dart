@@ -22,6 +22,17 @@ class PregnancyRecordAdapter extends TypeAdapter<PregnancyRecord> {
       motherName: fields[1] as String,
       lastMenstrualPeriod: fields[2] as DateTime,
       expectedDeliveryDate: fields[3] as DateTime,
+      age: fields[8] as int,
+      phone: fields[9] as String,
+      address: fields[10] as String,
+      gravida: fields[11] as int,
+      parity: fields[12] as int,
+      previousPregnancies: fields[13] as bool,
+      familyIllness: fields[14] as bool,
+      familyIllnessDetails: fields[15] as String?,
+      medicalHistory: fields[16] as String?,
+      testFileName: fields[17] as String?,
+      testFilePath: fields[18] as String?,
       notes: fields[4] as String?,
       checkups: (fields[5] as List?)?.cast<CheckupRecord>(),
       createdAt: fields[6] as DateTime?,
@@ -31,7 +42,29 @@ class PregnancyRecordAdapter extends TypeAdapter<PregnancyRecord> {
   @override
   void write(BinaryWriter writer, PregnancyRecord obj) {
     writer
+      ..writeByte(19)
+      ..writeByte(18)
+      ..write(obj.testFilePath)
       ..writeByte(8)
+      ..write(obj.age)
+      ..writeByte(9)
+      ..write(obj.phone)
+      ..writeByte(10)
+      ..write(obj.address)
+      ..writeByte(11)
+      ..write(obj.gravida)
+      ..writeByte(12)
+      ..write(obj.parity)
+      ..writeByte(13)
+      ..write(obj.previousPregnancies)
+      ..writeByte(14)
+      ..write(obj.familyIllness)
+      ..writeByte(15)
+      ..write(obj.familyIllnessDetails)
+      ..writeByte(16)
+      ..write(obj.medicalHistory)
+      ..writeByte(17)
+      ..write(obj.testFileName)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)

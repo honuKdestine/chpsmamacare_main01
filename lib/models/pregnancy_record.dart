@@ -4,6 +4,37 @@ part 'pregnancy_record.g.dart';
 
 @HiveType(typeId: 0)
 class PregnancyRecord extends HiveObject {
+  @HiveField(18)
+  final String? testFilePath;
+  @HiveField(8)
+  int age;
+
+  @HiveField(9)
+  String phone;
+
+  @HiveField(10)
+  String address;
+
+  @HiveField(11)
+  int gravida;
+
+  @HiveField(12)
+  int parity;
+
+  @HiveField(13)
+  bool previousPregnancies;
+
+  @HiveField(14)
+  bool familyIllness;
+
+  @HiveField(15)
+  String? familyIllnessDetails;
+
+  @HiveField(16)
+  String? medicalHistory;
+
+  @HiveField(17)
+  String? testFileName;
   @HiveField(0)
   String id;
 
@@ -23,7 +54,7 @@ class PregnancyRecord extends HiveObject {
   List<CheckupRecord> checkups;
 
   @HiveField(6)
-  String createdAt;
+  DateTime createdAt;
   @HiveField(7)
   String midwifeName;
 
@@ -33,12 +64,22 @@ class PregnancyRecord extends HiveObject {
     required this.motherName,
     required this.lastMenstrualPeriod,
     required this.expectedDeliveryDate,
+    required this.age,
+    required this.phone,
+    required this.address,
+    required this.gravida,
+    required this.parity,
+    required this.previousPregnancies,
+    required this.familyIllness,
+    this.familyIllnessDetails,
+    this.medicalHistory,
+    this.testFileName,
+    this.testFilePath,
     this.notes,
     List<CheckupRecord>? checkups,
     DateTime? createdAt,
   }) : checkups = checkups ?? [],
-       createdAt =
-           createdAt?.toIso8601String() ?? DateTime.now().toIso8601String();
+       createdAt = createdAt ?? DateTime.now();
 
   // Calculate current week of pregnancy
   int get currentWeek {

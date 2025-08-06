@@ -33,23 +33,31 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   uuid: ^3.0.7
-  intl: ^0.18.1
   google_fonts: ^5.1.0
   permission_handler: ^12.0.0+1
-  flutter_local_notifications: ^19.2.1
+  intl: ^0.17.0
   speech_to_text:
+  record: ^4.4.4
+  just_audio: ^0.9.36
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   firebase_core: ^3.14.0
+  file_picker: ^10.2.0
+  url_launcher: ^6.3.2
+  device_info_plus: ^11.5.0
+  flutter_local_notifications: ^19.1.0
+  timezone: ^0.10.1
+  open_file: ^3.5.10
+  flutter_sound: ^9.28.0
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   build_runner: ^2.4.9
   hive_generator: ^2.0.1
-
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -69,8 +77,9 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    # - assets/first_aid_guides/
+    - images/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -84,12 +93,12 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
+  fonts:
+    - family: Montserrat
+      fonts:
+        - asset: fonts/Montserrat-Regular.ttf
+          # - asset: fonts/Montserrat-Bold.ttf
+          weight: 600
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf

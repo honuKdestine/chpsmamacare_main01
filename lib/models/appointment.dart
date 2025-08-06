@@ -32,16 +32,28 @@ class Appointment extends HiveObject {
   @HiveField(8)
   final DateTime createdAt;
 
+  @HiveField(9)
+  String purpose;
+
+  @HiveField(10)
+  String? patientName;
+
+  @HiveField(11)
+  String status; // "pending", "completed", "missed"
+
   Appointment({
     String? id,
     required this.title,
     required this.dateTime,
     this.notes,
+    required this.status, // Defaults status to pending
     this.motherRecordId,
     this.soundFile,
     this.isRecurring = false,
     this.recurringIntervalDays,
     DateTime? createdAt,
+    this.purpose = '',
+    this.patientName,
   }) : id = id ?? const Uuid().v4(),
        createdAt = createdAt ?? DateTime.now();
 }
