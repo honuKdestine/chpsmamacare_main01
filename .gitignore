@@ -47,3 +47,145 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+
+# Misc
+*.class
+*.lock
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+.idea/
+.packages
+.pub-cache/
+.pub/
+.vscode/
+*.iml
+
+# Flutter/Dart/Pub related
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+build/
+pubspec.lock
+
+# Android related
+android/.gradle/
+android/captures/
+android/gradle/
+android/app/build/
+*.jks
+*.keystore
+
+# iOS related
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/App.framework
+ios/Flutter/engine/
+ios/Pods/
+ios/Runner/GeneratedPluginRegistrant.*
+ios/.symlinks/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/Generated.xcconfig.d
+ios/Runner.xcodeproj/project.xcworkspace/
+ios/Runner.xcworkspace/
+xcuserdata/
+
+# Web related
+web/.dart_tool/
+
+# Windows related
+windows/.dart_tool/
+windows/runner/Debug/
+windows/runner/Release/
+windows/build/
+
+# macOS related
+macos/Flutter/ephemeral/
+macos/.dart_tool/
+
+# Linux related
+linux/.dart_tool/
+
+# Coverage
+coverage/
+
+# Generated files
+*.g.dart
+# Misc
+*.class
+*.lock
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+.idea/
+.packages
+.pub-cache/
+.pub/
+.vscode/
+*.iml
+
+# Flutter/Dart/Pub related
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+build/
+pubspec.lock
+
+# Android related
+android/.gradle/
+android/captures/
+android/gradle/
+android/app/build/
+*.jks
+*.keystore
+
+# iOS related
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/App.framework
+ios/Flutter/engine/
+ios/Pods/
+ios/Runner/GeneratedPluginRegistrant.*
+ios/.symlinks/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/Generated.xcconfig.d
+ios/Runner.xcodeproj/project.xcworkspace/
+ios/Runner.xcworkspace/
+xcuserdata/
+
+# Web related
+web/.dart_tool/
+
+# Windows related
+windows/.dart_tool/
+windows/runner/Debug/
+windows/runner/Release/
+windows/build/
+
+# macOS related
+macos/Flutter/ephemeral/
+macos/.dart_tool/
+
+# Linux related
+linux/.dart_tool/
+
+# Coverage
+coverage/
+
+# Generated files
+*.g.dart
