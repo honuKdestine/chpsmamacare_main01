@@ -51,7 +51,7 @@ class HealthTips {
       content:
           'After 20 weeks, try to sleep on your left side to improve blood flow to the heart, foetus, uterus, and kidneys.',
       category: 'rest',
-      drawableName: "tip_rest", // Use drawable name for Android notifications
+      drawableName: "tip_sleep", // Use drawable name for Android notifications
     ),
     HealthTip(
       id: 5,
@@ -60,7 +60,7 @@ class HealthTips {
           'Take folic acid supplements daily as prescribed to prevent neural tube defects in the baby.',
       category: 'nutrition',
       drawableName:
-          "tip_nutrition", // Use drawable name for Android notifications
+          "tip_medication", // Use drawable name for Android notifications
     ),
     HealthTip(
       id: 6,
@@ -68,7 +68,7 @@ class HealthTips {
       content:
           'Be aware of danger signs like severe headache, vision changes, or vaginal bleeding and seek immediate medical attention if they occur.',
       category: 'safety',
-      drawableName: null, // Use drawable name for Android notifications
+      drawableName: "tip_safety", // Use drawable name for Android notifications
     ),
     HealthTip(
       id: 7,
@@ -76,7 +76,8 @@ class HealthTips {
       content:
           'Don\'t miss your scheduled antenatal visits, even if you feel fine. Regular monitoring is essential for a healthy pregnancy.',
       category: 'healthcare',
-      drawableName: null, // Use drawable name for Android notifications
+      drawableName:
+          "tip_checkup", // Use drawable name for Android notifications
     ),
     HealthTip(
       id: 8,
@@ -84,7 +85,8 @@ class HealthTips {
       content:
           'Avoid alcohol, tobacco, and unprescribed medications during pregnancy as they can harm your baby\'s development.',
       category: 'safety',
-      drawableName: null, // Use drawable name for Android notifications
+      drawableName:
+          "tip_harmful", // Use drawable name for Android notifications
     ),
     HealthTip(
       id: 9,
@@ -93,7 +95,7 @@ class HealthTips {
           'Ensure adequate calcium intake through dairy products or supplements to support your baby\'s bone development.',
       category: 'nutrition',
       drawableName:
-          "tip_nutrition", // Use drawable name for Android notifications
+          "tip_calcium", // Use drawable name for Android notifications
     ),
     HealthTip(
       id: 10,
@@ -101,7 +103,8 @@ class HealthTips {
       content:
           'Practice deep breathing or gentle stretching to manage stress, which can affect both your health and your baby.',
       category: 'mental health',
-      drawableName: null, // Use drawable name for Android notifications
+      drawableName:
+          "tip_manage_stress", // Use drawable name for Android notifications
     ),
   ];
 }

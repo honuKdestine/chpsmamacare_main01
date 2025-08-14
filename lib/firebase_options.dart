@@ -41,47 +41,47 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDm5458iFYpX_GwtZ9rPNp2wELaW3orxfw',
-    appId: '1:764443138768:web:784bd178f121711a255cd5',
-    messagingSenderId: '764443138768',
-    projectId: 'mini-98b04',
-    authDomain: 'mini-98b04.firebaseapp.com',
-    storageBucket: 'mini-98b04.firebasestorage.app',
+    apiKey: 'AIzaSyBV1Ah5N9HksLDqCbq0XzIGSNhNHiIb4UY',
+    appId: '1:402480661551:web:6453a1fa8ce0dc919cf2da',
+    messagingSenderId: '402480661551',
+    projectId: 'mini33-69a7c',
+    authDomain: 'mini33-69a7c.firebaseapp.com',
+    storageBucket: 'mini33-69a7c.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDOPOTXtKYtggpijizW-XNNo928Q_e8qPA',
-    appId: '1:764443138768:android:384ceb9c9d8abae2255cd5',
-    messagingSenderId: '764443138768',
-    projectId: 'mini-98b04',
-    storageBucket: 'mini-98b04.firebasestorage.app',
+    apiKey: 'AIzaSyBYmhWTqTP42YaS_0vh4ySfsPjDKwX05Hw',
+    appId: '1:402480661551:android:f1a70edadb5891c59cf2da',
+    messagingSenderId: '402480661551',
+    projectId: 'mini33-69a7c',
+    storageBucket: 'mini33-69a7c.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAD1Tgrs3QObRe8yqDkyl1jULI97gDWqtU',
-    appId: '1:764443138768:ios:587adfdb9debf40f255cd5',
-    messagingSenderId: '764443138768',
-    projectId: 'mini-98b04',
-    storageBucket: 'mini-98b04.firebasestorage.app',
+    apiKey: 'AIzaSyAG0bYd076seq_GbJ0LcYbNUQailaD0NQg',
+    appId: '1:402480661551:ios:8a88ff840f685b7a9cf2da',
+    messagingSenderId: '402480661551',
+    projectId: 'mini33-69a7c',
+    storageBucket: 'mini33-69a7c.firebasestorage.app',
     iosBundleId: 'com.example.chpsmamacareMain01',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAD1Tgrs3QObRe8yqDkyl1jULI97gDWqtU',
-    appId: '1:764443138768:ios:587adfdb9debf40f255cd5',
-    messagingSenderId: '764443138768',
-    projectId: 'mini-98b04',
-    storageBucket: 'mini-98b04.firebasestorage.app',
+    apiKey: 'AIzaSyAG0bYd076seq_GbJ0LcYbNUQailaD0NQg',
+    appId: '1:402480661551:ios:8a88ff840f685b7a9cf2da',
+    messagingSenderId: '402480661551',
+    projectId: 'mini33-69a7c',
+    storageBucket: 'mini33-69a7c.firebasestorage.app',
     iosBundleId: 'com.example.chpsmamacareMain01',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyDm5458iFYpX_GwtZ9rPNp2wELaW3orxfw',
-    appId: '1:764443138768:web:4ed6058b740d82f0255cd5',
-    messagingSenderId: '764443138768',
-    projectId: 'mini-98b04',
-    authDomain: 'mini-98b04.firebaseapp.com',
-    storageBucket: 'mini-98b04.firebasestorage.app',
+    apiKey: 'AIzaSyBV1Ah5N9HksLDqCbq0XzIGSNhNHiIb4UY',
+    appId: '1:402480661551:web:f289081f93e4e2499cf2da',
+    messagingSenderId: '402480661551',
+    projectId: 'mini33-69a7c',
+    authDomain: 'mini33-69a7c.firebaseapp.com',
+    storageBucket: 'mini33-69a7c.firebasestorage.app',
   );
 
 }

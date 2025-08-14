@@ -176,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     end: Alignment.bottomRight,
                   ),
                 ),
-                child: Image(image: AssetImage("images/image7.png")),
+                child: Image(image: AssetImage("images/image12.png")),
               ),
               const SizedBox(height: 40),
               ListTile(
@@ -184,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: const Text('Settings'),
                 onTap: () {
                   // Handle settings tap
-                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/settings');
                 },
               ),
               const SizedBox(height: 40),
@@ -195,6 +195,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Handle about tap
                   Navigator.pop(context);
                 },
+              ),
+              const SizedBox(height: 470),
+              Center(
+                child: Text(
+                  "CHPS MaMaCare v1.0.0",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontFamily: 'Montserrat',
+                  ),
+                ),
               ),
             ],
           ),
@@ -505,7 +515,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const AddRecordScreen(),
+                                builder: (context) =>
+                                    const AddRecordScreen(patientId: ''),
                               ),
                             ).then((_) => _loadStats());
                           },

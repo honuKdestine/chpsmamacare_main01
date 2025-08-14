@@ -4,8 +4,29 @@ part 'pregnancy_record.g.dart';
 
 @HiveType(typeId: 0)
 class PregnancyRecord extends HiveObject {
-  @HiveField(18)
-  final String? testFilePath;
+  @HiveField(0)
+  String id;
+
+  @HiveField(1)
+  String motherName;
+
+  @HiveField(2)
+  DateTime lastMenstrualPeriod;
+
+  @HiveField(3)
+  DateTime expectedDeliveryDate;
+
+  @HiveField(4)
+  String? notes;
+
+  @HiveField(5)
+  List<CheckupRecord> checkups;
+
+  @HiveField(6)
+  DateTime createdAt;
+  @HiveField(7)
+  String midwifeName;
+
   @HiveField(8)
   int age;
 
@@ -34,29 +55,16 @@ class PregnancyRecord extends HiveObject {
   String? medicalHistory;
 
   @HiveField(17)
-  String? testFileName;
-  @HiveField(0)
-  String id;
+  List<String>? testFileNames;
 
-  @HiveField(1)
-  String motherName;
+  @HiveField(18)
+  List<String>? testFilePaths;
 
-  @HiveField(2)
-  DateTime lastMenstrualPeriod;
+  @HiveField(19)
+  String patientId;
 
-  @HiveField(3)
-  DateTime expectedDeliveryDate;
-
-  @HiveField(4)
-  String? notes;
-
-  @HiveField(5)
-  List<CheckupRecord> checkups;
-
-  @HiveField(6)
-  DateTime createdAt;
-  @HiveField(7)
-  String midwifeName;
+  @HiveField(20)
+  DateTime? dateOfBirth;
 
   PregnancyRecord({
     required this.id,
@@ -73,13 +81,64 @@ class PregnancyRecord extends HiveObject {
     required this.familyIllness,
     this.familyIllnessDetails,
     this.medicalHistory,
-    this.testFileName,
-    this.testFilePath,
+    this.testFileNames,
+    this.testFilePaths,
     this.notes,
+    required this.patientId,
+    this.dateOfBirth,
     List<CheckupRecord>? checkups,
     DateTime? createdAt,
+    String? testFileUrl,
   }) : checkups = checkups ?? [],
        createdAt = createdAt ?? DateTime.now();
+
+  PregnancyRecord copyWith({
+    String? patientId,
+    String? id,
+    String? midwifeName,
+    String? motherName,
+    int? age,
+    String? phone,
+    String? address,
+    int? gravida,
+    int? parity,
+    bool? previousPregnancies,
+    bool? familyIllness,
+    String? familyIllnessDetails,
+    String? medicalHistory,
+    List<String>? testFileNames,
+    List<String>? testFilePaths,
+    DateTime? lastMenstrualPeriod,
+    DateTime? expectedDeliveryDate,
+    String? notes,
+    List<CheckupRecord>? checkups,
+    DateTime? createdAt,
+    DateTime? dateOfBirth,
+  }) {
+    return PregnancyRecord(
+      patientId: patientId ?? this.patientId,
+      id: id ?? this.id,
+      midwifeName: midwifeName ?? this.midwifeName,
+      motherName: motherName ?? this.motherName,
+      age: age ?? this.age,
+      phone: phone ?? this.phone,
+      address: address ?? this.address,
+      gravida: gravida ?? this.gravida,
+      parity: parity ?? this.parity,
+      previousPregnancies: previousPregnancies ?? this.previousPregnancies,
+      familyIllness: familyIllness ?? this.familyIllness,
+      familyIllnessDetails: familyIllnessDetails ?? this.familyIllnessDetails,
+      medicalHistory: medicalHistory ?? this.medicalHistory,
+      testFileNames: testFileNames ?? this.testFileNames,
+      testFilePaths: testFilePaths ?? this.testFilePaths,
+      lastMenstrualPeriod: lastMenstrualPeriod ?? this.lastMenstrualPeriod,
+      expectedDeliveryDate: expectedDeliveryDate ?? this.expectedDeliveryDate,
+      notes: notes ?? this.notes,
+      checkups: checkups ?? this.checkups,
+      createdAt: createdAt ?? this.createdAt,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+    );
+  }
 
   // Calculate current week of pregnancy
   int get currentWeek {
@@ -98,6 +157,70 @@ class PregnancyRecord extends HiveObject {
     if (checkups.isEmpty) return null;
     checkups.sort((a, b) => b.date.compareTo(a.date));
     return checkups.first;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'patientId': patientId,
+      'midwifeName': midwifeName,
+      'motherName': motherName,
+      'lastMenstrualPeriod': lastMenstrualPeriod.toIso8601String(),
+      'expectedDeliveryDate': expectedDeliveryDate.toIso8601String(),
+      'age': age,
+      'phone': phone,
+      'address': address,
+      'gravida': gravida,
+      'parity': parity,
+      'previousPregnancies': previousPregnancies,
+      'familyIllness': familyIllness,
+      'familyIllnessDetails': familyIllnessDetails,
+      'medicalHistory': medicalHistory,
+      'testFileNames': testFileNames ?? [],
+      'testFilePaths': testFilePaths ?? [],
+      'notes': notes,
+      'createdAt': createdAt.toIso8601String(),
+      'dateOfBirth': dateOfBirth?.toIso8601String(),
+      'checkups': checkups.map((c) => c.toJson()).toList(),
+    };
+  }
+
+  factory PregnancyRecord.fromJson(Map<String, dynamic> json) {
+    return PregnancyRecord(
+      id: json['id'] ?? '',
+      patientId: json['patientId'] ?? '',
+      midwifeName: json['midwifeName'] ?? '',
+      motherName: json['motherName'] ?? '',
+      lastMenstrualPeriod: DateTime.parse(json['lastMenstrualPeriod']),
+      expectedDeliveryDate: DateTime.parse(json['expectedDeliveryDate']),
+      age: json['age'] ?? 0,
+      phone: json['phone'] ?? '',
+      address: json['address'] ?? '',
+      gravida: json['gravida'] ?? 0,
+      parity: json['parity'] ?? 0,
+      previousPregnancies: json['previousPregnancies'] ?? false,
+      familyIllness: json['familyIllness'] ?? false,
+      familyIllnessDetails: json['familyIllnessDetails'],
+      medicalHistory: json['medicalHistory'],
+      testFileNames: (json['testFileNames'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList(),
+      testFilePaths: (json['testFilePaths'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList(),
+      notes: json['notes'],
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      dateOfBirth: json['dateOfBirth'] != null
+          ? DateTime.parse(json['dateOfBirth'])
+          : null,
+      checkups:
+          (json['checkups'] as List<dynamic>?)
+              ?.map((e) => CheckupRecord.fromJson(e))
+              .toList() ??
+          [],
+    );
   }
 }
 
@@ -135,4 +258,27 @@ class CheckupRecord {
   }) : dangerSigns = dangerSigns ?? [];
 
   bool get hasDangerSigns => dangerSigns.isNotEmpty;
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'date': date.toIso8601String(),
+      'notes': notes,
+      'dangerSigns': dangerSigns,
+      'weight': weight,
+      'bloodPressure': bloodPressure,
+      'heartRate': heartRate,
+    };
+  }
+
+  factory CheckupRecord.fromJson(Map<String, dynamic> json) {
+    return CheckupRecord(
+      id: json['id'] ?? '',
+      date: DateTime.parse(json['date']),
+      notes: json['notes'] ?? '',
+      dangerSigns: List<String>.from(json['dangerSigns'] ?? []),
+      weight: (json['weight'] as num?)?.toDouble(),
+      bloodPressure: json['bloodPressure'],
+      heartRate: json['heartRate'],
+    );
+  }
 }

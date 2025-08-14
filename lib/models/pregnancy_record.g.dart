@@ -31,9 +31,11 @@ class PregnancyRecordAdapter extends TypeAdapter<PregnancyRecord> {
       familyIllness: fields[14] as bool,
       familyIllnessDetails: fields[15] as String?,
       medicalHistory: fields[16] as String?,
-      testFileName: fields[17] as String?,
-      testFilePath: fields[18] as String?,
+      testFileNames: (fields[17] as List?)?.cast<String>(),
+      testFilePaths: (fields[18] as List?)?.cast<String>(),
       notes: fields[4] as String?,
+      patientId: fields[19] as String,
+      dateOfBirth: fields[20] as DateTime?,
       checkups: (fields[5] as List?)?.cast<CheckupRecord>(),
       createdAt: fields[6] as DateTime?,
     );
@@ -42,9 +44,23 @@ class PregnancyRecordAdapter extends TypeAdapter<PregnancyRecord> {
   @override
   void write(BinaryWriter writer, PregnancyRecord obj) {
     writer
-      ..writeByte(19)
-      ..writeByte(18)
-      ..write(obj.testFilePath)
+      ..writeByte(21)
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.motherName)
+      ..writeByte(2)
+      ..write(obj.lastMenstrualPeriod)
+      ..writeByte(3)
+      ..write(obj.expectedDeliveryDate)
+      ..writeByte(4)
+      ..write(obj.notes)
+      ..writeByte(5)
+      ..write(obj.checkups)
+      ..writeByte(6)
+      ..write(obj.createdAt)
+      ..writeByte(7)
+      ..write(obj.midwifeName)
       ..writeByte(8)
       ..write(obj.age)
       ..writeByte(9)
@@ -64,23 +80,13 @@ class PregnancyRecordAdapter extends TypeAdapter<PregnancyRecord> {
       ..writeByte(16)
       ..write(obj.medicalHistory)
       ..writeByte(17)
-      ..write(obj.testFileName)
-      ..writeByte(0)
-      ..write(obj.id)
-      ..writeByte(1)
-      ..write(obj.motherName)
-      ..writeByte(2)
-      ..write(obj.lastMenstrualPeriod)
-      ..writeByte(3)
-      ..write(obj.expectedDeliveryDate)
-      ..writeByte(4)
-      ..write(obj.notes)
-      ..writeByte(5)
-      ..write(obj.checkups)
-      ..writeByte(6)
-      ..write(obj.createdAt)
-      ..writeByte(7)
-      ..write(obj.midwifeName);
+      ..write(obj.testFileNames)
+      ..writeByte(18)
+      ..write(obj.testFilePaths)
+      ..writeByte(19)
+      ..write(obj.patientId)
+      ..writeByte(20)
+      ..write(obj.dateOfBirth);
   }
 
   @override

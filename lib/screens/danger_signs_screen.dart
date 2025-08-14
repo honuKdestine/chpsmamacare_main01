@@ -1,3 +1,4 @@
+import 'package:chpsmamacare_main01/screens/emergency_referral_screen.dart';
 import 'package:chpsmamacare_main01/utils/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:chpsmamacare_main01/utils/danger_signs.dart';
@@ -179,13 +180,18 @@ class DangerSignsScreen extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 24),
-
                   // Emergency contact button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/emergency-referrals');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const EmergencyReferralScreen(),
+                          ),
+                        );
                       },
                       icon: const Icon(Icons.phone),
                       label: const Text('Emergency Contacts & Referrals'),

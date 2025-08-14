@@ -1,9 +1,14 @@
+import 'dart:async';
+
 import 'package:chpsmamacare_main01/models/pregnancy_record.dart';
 import 'package:chpsmamacare_main01/screens/add_record_screen.dart';
 import 'package:chpsmamacare_main01/screens/pregnancy_record_detail_screen.dart';
 import 'package:chpsmamacare_main01/services/database_service.dart';
 import 'package:chpsmamacare_main01/utils/app_theme.dart';
+import 'package:chpsmamacare_main01/utils/network_utils.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 
 class ViewRecordsScreen extends StatefulWidget {
@@ -21,40 +26,168 @@ class _ViewRecordsScreenState extends State<ViewRecordsScreen> {
 
   List<PregnancyRecord> _records = [];
   List<PregnancyRecord> _filteredRecords = [];
+
+  String _selectedFilter = 'Name'; // ✅ Default filter
+  final List<String> _filterOptions = [
+    'Name',
+    'Age',
+    'ID',
+  ]; // ✅ Available filters
+
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadRecords();
+    _listenToFirestore(); // Start listening for updates
     _searchController.addListener(_filterRecords);
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
   Future<void> _loadRecords() async {
-    final records = await _databaseService.getAllPregnancyRecords();
+    final localBox = await Hive.openBox<PregnancyRecord>('pregnancy_records');
+    final localRecords = localBox.values.toList();
+
     setState(() {
-      _records = records;
-      _filteredRecords = records;
+      _records = localRecords;
+      _filteredRecords = localRecords;
     });
+
+    if (await isOnline()) {
+      try {
+        final snapshot = await FirebaseFirestore.instance
+            .collection('pregnancy_records')
+            .get();
+
+        final firestoreRecords = snapshot.docs
+            .map((doc) => PregnancyRecord.fromJson(doc.data()))
+            .toList();
+
+        // Merge local + firestore without duplicates
+        final mergedRecords = {
+          for (var r in [...localRecords, ...firestoreRecords]) r.id: r,
+        }.values.toList();
+
+        setState(() {
+          _records = mergedRecords;
+          _filteredRecords = mergedRecords;
+        });
+
+        // Sync Hive with merged data
+        await localBox.clear();
+        await localBox.addAll(mergedRecords);
+      } catch (e) {
+        print("Firestore fetch failed: $e");
+      }
+    } else {
+      print("Offline — showing only local data");
+    }
   }
 
+  StreamSubscription? _firestoreSubscription;
+  // To listen to firestore changes and sync changes across devices
+
+  void _listenToFirestore() {
+    _firestoreSubscription = FirebaseFirestore.instance
+        .collection('pregnancy_records')
+        .snapshots()
+        .listen((snapshot) async {
+          if (!mounted) return; // Prevents setState after dispose
+
+          final remoteRecords = snapshot.docs
+              .map((doc) => PregnancyRecord.fromJson(doc.data()))
+              .toList();
+
+          final localBox = await Hive.openBox<PregnancyRecord>(
+            'pregnancy_records',
+          );
+
+          // Merge without duplicates (Firestore has priority)
+          final mergedRecords = {
+            for (var r in [...localBox.values, ...remoteRecords]) r.id: r,
+          }.values.toList();
+
+          await localBox.clear();
+          await localBox.addAll(mergedRecords);
+
+          if (mounted) {
+            setState(() {
+              _records = mergedRecords;
+              _filteredRecords = mergedRecords;
+            });
+          }
+        });
+  }
+
+  // filter search by name, age, id, etc
   void _filterRecords() {
-    final query = _searchController.text.toLowerCase();
+    final query = _searchController.text.trim().toLowerCase();
+    if (query.isEmpty) {
+      setState(() => _filteredRecords = List.from(_records));
+      return;
+    }
+
     setState(() {
-      _filteredRecords = _records.where((record) {
-        return record.motherName.toLowerCase().contains(query);
+      _filteredRecords = _records.where((r) {
+        switch (_selectedFilter) {
+          case 'Name':
+            return r.motherName.toLowerCase().contains(query);
+          case 'Age':
+            return r.age.toString().contains(query);
+          case 'ID':
+            return (r.patientId ?? '').toLowerCase().contains(query);
+
+          default:
+            return false;
+        }
       }).toList();
     });
   }
 
+  // void _filterRecords() {
+  //   final query = _searchController.text.trim().toLowerCase();
+  //   if (query.isEmpty) {
+  //     setState(() => _filteredRecords = List.from(_records));
+  //     return;
+  //   }
+  //   setState(() {
+  //     _filteredRecords = _records.where((r) {
+  //       final name = r.motherName.toLowerCase();
+  //       final id = (r.id ?? '').toLowerCase();
+  //       final phone = (r.phone ?? '').toLowerCase();
+  //       final midwife = (r.midwifeName ?? '').toLowerCase();
+  //       final addr = (r.address ?? '').toLowerCase();
+  //       final ageStr = r.age.toString(); // numeric
+
+  //       return name.contains(query) ||
+  //           id.contains(query) ||
+  //           phone.contains(query) ||
+  //           midwife.contains(query) ||
+  //           addr.contains(query) ||
+  //           ageStr.contains(query);
+  //     }).toList();
+  //   });
+  //   // setState(() {
+  //   //   _filteredRecords = _records.where((record) {
+  //   //     return record.motherName.toLowerCase().contains(query);
+  //   //   }).toList();
+  //   // });
+  // }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _firestoreSubscription?.cancel(); // ✅ Cancel Firestore listener
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final groupedRecords = <String, List<PregnancyRecord>>{};
+    for (var record in _filteredRecords) {
+      final patientKey = record.id ?? record.motherName;
+      groupedRecords.putIfAbsent(patientKey, () => []).add(record);
+    }
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -99,12 +232,19 @@ class _ViewRecordsScreenState extends State<ViewRecordsScreen> {
                   ? _buildEmptyState()
                   : RefreshIndicator(
                       onRefresh: _loadRecords,
-                      child: ListView.builder(
+                      child: GridView.builder(
                         padding: const EdgeInsets.all(16),
-                        itemCount: _filteredRecords.length,
+                        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent:
+                              200, // max width of each folder tile
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 0.9, // height/width ratio
+                        ),
+                        itemCount: groupedRecords.length,
                         itemBuilder: (context, index) {
-                          final record = _filteredRecords[index];
-                          return _buildRecordCard(record);
+                          final entry = groupedRecords.entries.elementAt(index);
+                          return _buildFolder(entry.key, entry.value);
                         },
                       ),
                     ),
@@ -131,31 +271,59 @@ class _ViewRecordsScreenState extends State<ViewRecordsScreen> {
                       width: 1.0,
                     ),
                   ),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search by mother\'s name...',
-                      hintStyle: TextStyle(
-                        color: Colors.black.withOpacity(0.65),
-                        fontWeight: FontWeight.w500,
+
+                  child: Row(
+                    children: [
+                      DropdownButton<String>(
+                        value: _selectedFilter, // ✅ Current filter
+                        items: _filterOptions.map((option) {
+                          return DropdownMenuItem<String>(
+                            value: option,
+                            child: Text(option),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              _selectedFilter = value;
+                              _filterRecords(); // ✅ Refresh results on change
+                            });
+                          }
+                        },
                       ),
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: _searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                _searchController.clear();
-                              },
-                            )
-                          : null,
-                      filled: true,
-                      fillColor: Colors.white.withOpacity(0.35),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText:
+                                'Search by $_selectedFilter...', // ✅ Dynamic placeholder
+                            hintStyle: TextStyle(
+                              color: Colors.black.withOpacity(0.65),
+                              fontWeight: FontWeight.w500,
+                            ),
+                            prefixIcon: const Icon(Icons.search),
+                            suffixIcon: _searchController.text.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      _searchController.clear();
+                                    },
+                                  )
+                                : null,
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.35),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 0,
+                            ),
+                          ),
+                        ),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                    ),
+                    ],
                   ),
                 ),
               ),
@@ -169,7 +337,12 @@ class _ViewRecordsScreenState extends State<ViewRecordsScreen> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AddRecordScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => AddRecordScreen(
+                        patientId: DateTime.now().millisecondsSinceEpoch
+                            .toString(),
+                      ),
+                    ),
                   );
                 },
                 child: Container(
@@ -256,6 +429,74 @@ class _ViewRecordsScreenState extends State<ViewRecordsScreen> {
         ),
       );
     }
+  }
+
+  //
+  // Widget _buildFolder(String patientId, List<PregnancyRecord> records) {
+  //   final firstRecord = records.first;
+  //   return Card(
+  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  //     child: ListTile(
+  //       leading: Icon(Icons.folder, color: Colors.amber, size: 40),
+  //       title: Text(
+  //         firstRecord.motherName,
+  //         style: TextStyle(fontWeight: FontWeight.bold),
+  //       ),
+  //       subtitle: Text('${records.length} record(s)'),
+  //       trailing: Icon(Icons.arrow_forward_ios, size: 16),
+  //       onTap: () {
+  //         Navigator.push(
+  //           context,
+  //           MaterialPageRoute(
+  //             builder: (_) => PatientFolderScreen(
+  //               patientName: firstRecord.motherName,
+  //               records: records,
+  //             ),
+  //           ),
+  //         );
+  //       },
+  //     ),
+  //   );
+  // }
+
+  Widget _buildFolder(String patientId, List<PregnancyRecord> records) {
+    final firstRecord = records.first;
+
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PregnancyRecordDetailScreen(record: firstRecord),
+          ),
+        );
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.folder, color: Colors.amber, size: 60),
+          const SizedBox(height: 8),
+          Text(
+            firstRecord.motherName,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            firstRecord.patientId ?? "No ID",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            DateFormat('dd MMM yyyy').format(firstRecord.createdAt),
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildRecordCard(PregnancyRecord record) {

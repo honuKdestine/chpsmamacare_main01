@@ -39,6 +39,10 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
+#android/java_pid3716.hprof
+*.hprof
+
+
 # Android Studio will place build artifacts here
 /android/app/debug
 /android/app/profile

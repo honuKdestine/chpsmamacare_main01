@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'firebase_options.dart';
 import 'dart:io';
@@ -19,6 +20,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Enable offline sync
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: true,
+    cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+);
+
+  // final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   print("Starting CHPS MamaCare...");
   // Request notification permission early
@@ -48,7 +57,6 @@ void main() async {
     tz_data.initializeTimeZones();
     print("Notification service initialized");
 
-    // NotificationService().cancelAllScheduledNotifications();
     // Schedule daily health tips
     NotificationService().scheduleHealthTipNotifications();
     print("Daily health tip scheduled");
@@ -87,7 +95,6 @@ Future<void> requestNotificationPermission() async {
     }
   }
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

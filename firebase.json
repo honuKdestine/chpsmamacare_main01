@@ -3,20 +3,20 @@
     "platforms": {
       "android": {
         "default": {
-          "projectId": "mini-98b04",
-          "appId": "1:764443138768:android:384ceb9c9d8abae2255cd5",
+          "projectId": "mini33-69a7c",
+          "appId": "1:402480661551:android:f1a70edadb5891c59cf2da",
           "fileOutput": "android/app/google-services.json"
         }
       },
       "dart": {
         "lib/firebase_options.dart": {
-          "projectId": "mini-98b04",
+          "projectId": "mini33-69a7c",
           "configurations": {
-            "android": "1:764443138768:android:384ceb9c9d8abae2255cd5",
-            "ios": "1:764443138768:ios:587adfdb9debf40f255cd5",
-            "macos": "1:764443138768:ios:587adfdb9debf40f255cd5",
-            "web": "1:764443138768:web:784bd178f121711a255cd5",
-            "windows": "1:764443138768:web:4ed6058b740d82f0255cd5"
+            "android": "1:402480661551:android:f1a70edadb5891c59cf2da",
+            "ios": "1:402480661551:ios:8a88ff840f685b7a9cf2da",
+            "macos": "1:402480661551:ios:8a88ff840f685b7a9cf2da",
+            "web": "1:402480661551:web:6453a1fa8ce0dc919cf2da",
+            "windows": "1:402480661551:web:f289081f93e4e2499cf2da"
           }
         }
       }

@@ -1,42 +1,30 @@
 import 'dart:io';
-
 import 'package:chpsmamacare_main01/models/pregnancy_record.dart';
 import 'package:chpsmamacare_main01/services/database_service.dart';
+import 'package:chpsmamacare_main01/services/storage_service.dart';
 import 'package:chpsmamacare_main01/utils/app_theme.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
-import 'package:uuid/uuid.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:file_picker/file_picker.dart';
 
 class AddRecordScreen extends StatefulWidget {
   final PregnancyRecord? existingRecord;
+  final String patientId;
 
-  const AddRecordScreen({super.key, this.existingRecord});
+  const AddRecordScreen({
+    super.key,
+    this.existingRecord,
+    required this.patientId,
+  });
 
   @override
   State<AddRecordScreen> createState() => _AddRecordScreenState();
 }
 
 class _AddRecordScreenState extends State<AddRecordScreen> {
-  // final _ageController = TextEditingController();
-  // final _phoneController = TextEditingController();
-  // final _addressController = TextEditingController();
-  // final _gravidaController = TextEditingController();
-  // final _parityController = TextEditingController();
-  // final _medicalHistoryController = TextEditingController();
-  // bool _previousPregnancies = false;
-  // bool familyIllness = false;
-  // final familyIllnessController = TextEditingController();
-  // String? testFileName;
-  // String? _testFilePath;
-  // final _formKey = GlobalKey<FormState>();
-  // final _nameController = TextEditingController();
-  // final _notesController = TextEditingController();
-  // final TextEditingController _midwifeNameController = TextEditingController();
-  // DateTime? lmp;
-  // DateTime? edd;
-
   late TextEditingController nameController;
   late TextEditingController ageController;
   late TextEditingController phoneController;
@@ -44,8 +32,10 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
   late TextEditingController gravidaController;
   late TextEditingController parityController;
   late TextEditingController medicalHistoryController;
-  String? testFileName;
-  String? testFilePath;
+  List<String> testFileNames = [];
+  List<String> testFilePaths = [];
+  final List<File> _selectedFiles = [];
+  List<String> uploadedFileUrls = [];
 
   late TextEditingController familyIllnessController;
   late TextEditingController notesController;
@@ -57,6 +47,7 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
   late DateTime lmp;
   late DateTime edd;
   late bool familyIllness;
+  DateTime? dateOfBirth;
 
   final DatabaseService _databaseService = DatabaseService();
   final DateFormat _dateFormat = DateFormat('dd MMM, yyyy');
@@ -81,8 +72,8 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
     lmp = DateTime.now();
     edd = DateTime.now().add(const Duration(days: 280)); // Default EDD
     previousPregnancies = false;
-    testFileName = null;
-    testFilePath = null;
+    testFileNames = <String>[];
+    testFilePaths = <String>[];
     _isLoading = false;
     // If editing an existing record, populate the fields
 
@@ -102,6 +93,7 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
       familyIllnessController.text = existingRecord!.familyIllnessDetails ?? '';
       lmp = existingRecord!.lastMenstrualPeriod;
       edd = existingRecord!.expectedDeliveryDate;
+      dateOfBirth = existingRecord!.dateOfBirth;
     }
   }
 
@@ -157,69 +149,128 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
     }
   }
 
+  Future<String> generateNextPatientId() async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('pregnancyRecords')
+        .orderBy('patientNumber', descending: true)
+        .limit(1)
+        .get();
+
+    int nextNumber = 1;
+    if (snapshot.docs.isNotEmpty) {
+      nextNumber = (snapshot.docs.first['patientNumber'] ?? 0) + 1;
+    }
+
+    return 'P-${nextNumber.toString().padLeft(4, '0')}';
+  }
+
   void _saveRecord() async {
     if (formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
 
+      String patientId;
+
+      if (existingRecord == null) {
+        // New record: generate next ID
+        patientId = await generateNextPatientId();
+      } else {
+        // Editing: keep original ID
+        patientId = existingRecord!.patientId;
+      }
+
+      // upload file to storage first
+      List<String> uploadedFileUrls = [];
+      for (int i = 0; i < testFilePaths.length; i++) {
+        try {
+          String url = await StorageService().uploadTestFile(
+            testFilePaths[i],
+            testFileNames[i],
+          );
+          uploadedFileUrls.add(url);
+        } catch (e) {
+          print('File upload failed for ${testFileNames[i]}: $e');
+        }
+      }
+
+      //Merge old + new files when updating
+      List<String> finalFileUrls = [];
+      List<String> finalFileNames = [];
+      if (existingRecord?.testFilePaths != null) {
+        finalFileUrls.addAll(existingRecord!.testFilePaths!);
+      }
+      if (existingRecord?.testFileNames != null) {
+        finalFileNames.addAll(existingRecord!.testFileNames!);
+      }
+      finalFileUrls.addAll(uploadedFileUrls);
+      finalFileNames.addAll(testFileNames);
+
       try {
-        final newRecord = PregnancyRecord(
-          id: widget.existingRecord?.id ?? const Uuid().v4(),
-          midwifeName: midwifeNameController.text.trim(),
-          motherName: nameController.text.trim(),
-          age: int.tryParse(ageController.text.trim()) ?? 0,
-          phone: phoneController.text.trim(),
-          address: addressController.text.trim(),
-          gravida: int.tryParse(gravidaController.text.trim()) ?? 0,
-          parity: int.tryParse(parityController.text.trim()) ?? 0,
-          previousPregnancies: previousPregnancies,
-          familyIllness: familyIllness,
-          familyIllnessDetails: familyIllness
-              ? familyIllnessController.text.trim()
-              : null,
-          medicalHistory: medicalHistoryController.text.trim().isEmpty
-              ? null
-              : medicalHistoryController.text.trim(),
-          testFileName: testFileName,
-          testFilePath: testFilePath,
+        if (existingRecord != null) {
+          // Update existing record
+          final updatedRecord = existingRecord!.copyWith(
+            midwifeName: midwifeNameController.text.trim(),
+            motherName: nameController.text.trim(),
+            age: int.tryParse(ageController.text.trim()) ?? 0,
+            phone: phoneController.text.trim(),
+            address: addressController.text.trim(),
+            gravida: int.tryParse(gravidaController.text.trim()) ?? 0,
+            parity: int.tryParse(parityController.text.trim()) ?? 0,
+            previousPregnancies: previousPregnancies,
+            familyIllness: familyIllness,
+            familyIllnessDetails: familyIllness
+                ? familyIllnessController.text.trim()
+                : null,
+            medicalHistory: medicalHistoryController.text.trim().isEmpty
+                ? null
+                : medicalHistoryController.text.trim(),
+            testFileNames: finalFileNames,
+            testFilePaths: finalFileUrls,
+            lastMenstrualPeriod: lmp,
+            expectedDeliveryDate: edd,
+            notes: notesController.text.trim().isEmpty
+                ? null
+                : notesController.text.trim(),
+            dateOfBirth: dateOfBirth,
+          );
 
-          lastMenstrualPeriod: lmp,
-          expectedDeliveryDate: edd,
-          notes: notesController.text.trim().isEmpty
-              ? null
-              : notesController.text.trim(),
-        );
-
-        if (widget.existingRecord != null) {
-          await _databaseService.updatePregnancyRecord(newRecord);
+          await _databaseService.updatePregnancyRecord(updatedRecord);
         } else {
+          // Create new record
           await _databaseService.addPregnancyRecord(
-            midwifeName: newRecord.midwifeName,
-            motherName: newRecord.motherName,
-            age: newRecord.age,
-            phone: newRecord.phone,
-            address: newRecord.address,
-            gravida: newRecord.gravida,
-            parity: newRecord.parity,
-            previousPregnancies: newRecord.previousPregnancies,
-            familyIllness: newRecord.familyIllness,
-            familyIllnessDetails: newRecord.familyIllnessDetails,
-            medicalHistory: newRecord.medicalHistory,
-            testFileName: newRecord.testFileName,
-            testFilePath: newRecord.testFilePath,
-            lastMenstrualPeriod: newRecord.lastMenstrualPeriod,
-            expectedDeliveryDate: newRecord.expectedDeliveryDate,
-            notes: newRecord.notes,
+            midwifeName: midwifeNameController.text.trim(),
+            motherName: nameController.text.trim(),
+            age: int.tryParse(ageController.text.trim()) ?? 0,
+            phone: phoneController.text.trim(),
+            address: addressController.text.trim(),
+            gravida: int.tryParse(gravidaController.text.trim()) ?? 0,
+            parity: int.tryParse(parityController.text.trim()) ?? 0,
+            previousPregnancies: previousPregnancies,
+            familyIllness: familyIllness,
+            familyIllnessDetails: familyIllness
+                ? familyIllnessController.text.trim()
+                : null,
+            medicalHistory: medicalHistoryController.text.trim().isEmpty
+                ? null
+                : medicalHistoryController.text.trim(),
+            testFileNames: finalFileNames,
+            testFilePaths: finalFileUrls,
+            lastMenstrualPeriod: lmp,
+            expectedDeliveryDate: edd,
+            notes: notesController.text.trim().isEmpty
+                ? null
+                : notesController.text.trim(),
+            dateOfBirth: dateOfBirth,
+            patientId: widget.patientId,
           );
         }
-
         if (!mounted) return;
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              widget.existingRecord != null
+              existingRecord != null
                   ? 'Record updated successfully'
                   : 'Pregnancy record saved successfully',
             ),
@@ -228,7 +279,9 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
         );
 
         Navigator.pop(context, true);
-      } catch (e) {
+      } catch (e, stack) {
+        print("Save record error: $e");
+        print(stack);
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -237,9 +290,11 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
           ),
         );
       } finally {
-        setState(() {
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
@@ -252,7 +307,17 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
     );
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: const Text('Add Pregnancy Record'), elevation: 8),
+        appBar: AppBar(
+          title: const Text(
+            'Add Pregnancy Record',
+            style: TextStyle(
+              fontFamily: 'Montserrat',
+              fontWeight: FontWeight.w400,
+              color: Colors.white,
+            ),
+          ),
+          elevation: 8,
+        ),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -450,6 +515,57 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
 
                     const SizedBox(height: 16),
 
+                    // Date of Birth
+                    const SizedBox(height: 16),
+                    GestureDetector(
+                      onTap: () async {
+                        final DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate:
+                              dateOfBirth ??
+                              DateTime.now().subtract(
+                                const Duration(days: 365 * 25),
+                              ),
+                          firstDate: DateTime(1950),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            dateOfBirth = picked;
+                          });
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              dateOfBirth != null
+                                  ? 'Date of Birth: ${_dateFormat.format(dateOfBirth!)}'
+                                  : 'Select Date of Birth',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: dateOfBirth != null
+                                    ? Colors.black
+                                    : Colors.grey[600],
+                              ),
+                            ),
+                            const Icon(Icons.calendar_today),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
                     // Address
                     TextFormField(
                       controller: addressController,
@@ -607,17 +723,18 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                                     'png',
                                     'gif',
                                   ],
+                                  allowMultiple: true,
                                 );
                             if (result != null && result.files.isNotEmpty) {
-                              setState(() {
-                                testFileName = result.files.single.name;
-                                testFilePath = result.files.single.path;
-                              });
-                            } else {
-                              setState(() {
-                                testFileName = null;
-                                testFilePath = null;
-                              });
+                              for (var file in result.files) {
+                                if (file.path != null) {
+                                  setState(() {
+                                    testFileNames.add(file.name);
+                                    testFilePaths.add(file.path!);
+                                  });
+                                  print("📁 Selected ${file.name} for upload");
+                                }
+                              }
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -628,50 +745,65 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                         ),
                         const SizedBox(width: 10),
                         Expanded(
-                          child: Text(
-                            (testFileName != null && testFileName!.isNotEmpty)
-                                ? testFileName!
-                                : 'No file selected',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          child: testFileNames.isNotEmpty
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: testFileNames
+                                      .map(
+                                        (name) => Text(
+                                          name,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      )
+                                      .toList(),
+                                )
+                              : const Text(
+                                  'No files selected',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey,
+                                  ),
+                                ),
                         ),
                       ],
                     ),
                     // If a file is selected, show an icon to view it
-                    if (testFilePath != null && testFilePath!.isNotEmpty)
-                      IconButton(
-                        icon: const Icon(Icons.visibility),
-                        tooltip: 'View File',
-                        onPressed: () async {
-                          try {
-                            final file = File(testFilePath!);
-                            if (!file.existsSync()) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('File does not exist'),
-                                ),
-                              );
-                              return;
-                            }
-
-                            final result = await OpenFile.open(file.path);
-                            if (result.type != ResultType.done) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Failed: ${result.message}'),
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Error opening file: $e')),
-                            );
-                          }
-                        },
+                    if (testFilePaths.isNotEmpty)
+                      Column(
+                        children: List.generate(testFilePaths.length, (index) {
+                          return ListTile(
+                            leading: IconButton(
+                              icon: const Icon(Icons.visibility),
+                              tooltip: 'View File',
+                              onPressed: () async {
+                                final path = testFilePaths[index];
+                                if (path.startsWith('http')) {
+                                  // Use url_launcher for network files
+                                  await launchUrl(
+                                    Uri.parse(path),
+                                    mode: LaunchMode.externalApplication,
+                                  );
+                                } else {
+                                  final file = File(path);
+                                  if (file.existsSync()) {
+                                    await OpenFile.open(file.path);
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('File not found'),
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                            ),
+                            title: Text(testFileNames[index]),
+                          );
+                        }),
                       ),
 
                     const SizedBox(height: 16),
@@ -739,7 +871,6 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                             children: [
                               ElevatedButton(
                                 onPressed: _isLoading ? null : _saveRecord,
-
                                 style: ElevatedButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 16,
@@ -768,10 +899,9 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                                           const SizedBox(width: 8),
                                           Flexible(
                                             child: Text(
-                                              widget.existingRecord != null
+                                              existingRecord != null
                                                   ? 'Update Pregnancy Record'
                                                   : 'Add Pregnancy Record',
-
                                               style: const TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w600,
@@ -826,7 +956,6 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                               Flexible(
                                 child: ElevatedButton(
                                   onPressed: _isLoading ? null : _saveRecord,
-
                                   style: ElevatedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 16,
@@ -847,16 +976,18 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                                                 ),
                                           ),
                                         )
-                                      : const Row(
+                                      : Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           children: [
-                                            Icon(Icons.save),
-                                            SizedBox(width: 8),
+                                            const Icon(Icons.save),
+                                            const SizedBox(width: 8),
                                             Flexible(
                                               child: Text(
-                                                'Save Pregnancy Record',
-                                                style: TextStyle(
+                                                existingRecord != null
+                                                    ? 'Update Pregnancy Record'
+                                                    : 'Add Pregnancy Record',
+                                                style: const TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.w600,
                                                 ),
