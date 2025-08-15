@@ -119,11 +119,11 @@ class NotificationService {
 
   void scheduleHealthTipNotifications() {
     final times = [
-      const TimeOfDay(hour: 6, minute: 30),
-      const TimeOfDay(hour: 9, minute: 30),
+      const TimeOfDay(hour: 11, minute: 30),
+      const TimeOfDay(hour: 12, minute: 10),
       const TimeOfDay(hour: 12, minute: 30),
-      const TimeOfDay(hour: 15, minute: 30),
-      const TimeOfDay(hour: 18, minute: 30),
+      const TimeOfDay(hour: 1, minute: 10),
+      const TimeOfDay(hour: 1, minute: 30),
     ];
 
     // Randomize or rotate tips

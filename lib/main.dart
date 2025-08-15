@@ -13,6 +13,7 @@ import 'package:timezone/data/latest.dart' as tz_data;
 import 'firebase_options.dart';
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -21,11 +22,18 @@ void main() async {
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  //Initialize supabase for file storage
+  await Supabase.initialize(
+    url: 'https://waxqtylfloptvclkmdvh.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndheHF0eWxmbG9wdHZjbGttZHZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMDUyMDcsImV4cCI6MjA3MDc4MTIwN30.w4lla44Y5Qhre-htNI3ClCE9R884bkGzegoz_sUHuTc',
+  );
+
   // Enable offline sync
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: true,
     cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
-);
+  );
 
   // final FirebaseFirestore firestore = FirebaseFirestore.instance;
 

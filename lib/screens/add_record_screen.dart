@@ -164,6 +164,131 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
     return 'P-${nextNumber.toString().padLeft(4, '0')}';
   }
 
+  // void _saveRecord() async {
+  //   if (formKey.currentState!.validate()) {
+  //     setState(() {
+  //       _isLoading = true;
+  //     });
+
+  //     String patientId;
+
+  //     if (existingRecord == null) {
+  //       // New record: generate next ID
+  //       patientId = await generateNextPatientId();
+  //     } else {
+  //       // Editing: keep original ID
+  //       patientId = existingRecord!.patientId;
+  //     }
+
+  //     // Merge old + new files when updating
+  //     List<String> finalFilePaths = [];
+  //     List<String> finalFileNames = [];
+
+  //     if (existingRecord?.testFilePaths != null) {
+  //       finalFilePaths.addAll(existingRecord!.testFilePaths!);
+  //     }
+  //     if (existingRecord?.testFileNames != null) {
+  //       finalFileNames.addAll(existingRecord!.testFileNames!);
+  //     }
+
+  //     // Directly store local file paths and names (no Firebase upload)
+  //     finalFilePaths.addAll(testFilePaths);
+  //     finalFileNames.addAll(testFileNames);
+
+  //     try {
+  //       if (existingRecord != null) {
+  //         // Update existing record
+  //         final updatedRecord = existingRecord!.copyWith(
+  //           midwifeName: midwifeNameController.text.trim(),
+  //           motherName: nameController.text.trim(),
+  //           age: int.tryParse(ageController.text.trim()) ?? 0,
+  //           phone: phoneController.text.trim(),
+  //           address: addressController.text.trim(),
+  //           gravida: int.tryParse(gravidaController.text.trim()) ?? 0,
+  //           parity: int.tryParse(parityController.text.trim()) ?? 0,
+  //           previousPregnancies: previousPregnancies,
+  //           familyIllness: familyIllness,
+  //           familyIllnessDetails: familyIllness
+  //               ? familyIllnessController.text.trim()
+  //               : null,
+  //           medicalHistory: medicalHistoryController.text.trim().isEmpty
+  //               ? null
+  //               : medicalHistoryController.text.trim(),
+  //           testFileNames: finalFileNames,
+  //           testFilePaths: finalFilePaths,
+  //           lastMenstrualPeriod: lmp,
+  //           expectedDeliveryDate: edd,
+  //           notes: notesController.text.trim().isEmpty
+  //               ? null
+  //               : notesController.text.trim(),
+  //           dateOfBirth: dateOfBirth,
+  //         );
+
+  //         await _databaseService.updatePregnancyRecord(updatedRecord);
+  //       } else {
+  //         // Create new record
+  //         await _databaseService.addPregnancyRecord(
+  //           midwifeName: midwifeNameController.text.trim(),
+  //           motherName: nameController.text.trim(),
+  //           age: int.tryParse(ageController.text.trim()) ?? 0,
+  //           phone: phoneController.text.trim(),
+  //           address: addressController.text.trim(),
+  //           gravida: int.tryParse(gravidaController.text.trim()) ?? 0,
+  //           parity: int.tryParse(parityController.text.trim()) ?? 0,
+  //           previousPregnancies: previousPregnancies,
+  //           familyIllness: familyIllness,
+  //           familyIllnessDetails: familyIllness
+  //               ? familyIllnessController.text.trim()
+  //               : null,
+  //           medicalHistory: medicalHistoryController.text.trim().isEmpty
+  //               ? null
+  //               : medicalHistoryController.text.trim(),
+  //           testFileNames: finalFileNames,
+  //           testFilePaths: finalFilePaths,
+  //           lastMenstrualPeriod: lmp,
+  //           expectedDeliveryDate: edd,
+  //           notes: notesController.text.trim().isEmpty
+  //               ? null
+  //               : notesController.text.trim(),
+  //           dateOfBirth: dateOfBirth,
+  //           patientId: widget.patientId,
+  //         );
+  //       }
+
+  //       if (!mounted) return;
+
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: Text(
+  //             existingRecord != null
+  //                 ? 'Record updated successfully'
+  //                 : 'Pregnancy record saved successfully',
+  //           ),
+  //           backgroundColor: AppColors.success,
+  //         ),
+  //       );
+
+  //       Navigator.pop(context, true);
+  //     } catch (e, stack) {
+  //       print("Save record error: $e");
+  //       print(stack);
+  //       if (!mounted) return;
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: Text('Error saving record: ${e.toString()}'),
+  //           backgroundColor: AppColors.danger,
+  //         ),
+  //       );
+  //     } finally {
+  //       if (mounted) {
+  //         setState(() {
+  //           _isLoading = false;
+  //         });
+  //       }
+  //     }
+  //   }
+  // }
+
   void _saveRecord() async {
     if (formKey.currentState!.validate()) {
       setState(() {
@@ -173,42 +298,36 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
       String patientId;
 
       if (existingRecord == null) {
-        // New record: generate next ID
         patientId = await generateNextPatientId();
       } else {
-        // Editing: keep original ID
         patientId = existingRecord!.patientId;
       }
 
-      // upload file to storage first
-      List<String> uploadedFileUrls = [];
-      for (int i = 0; i < testFilePaths.length; i++) {
-        try {
-          String url = await StorageService().uploadTestFile(
-            testFilePaths[i],
-            testFileNames[i],
-          );
-          uploadedFileUrls.add(url);
-        } catch (e) {
-          print('File upload failed for ${testFileNames[i]}: $e');
-        }
-      }
-
-      //Merge old + new files when updating
-      List<String> finalFileUrls = [];
+      List<String> finalFilePaths = [];
       List<String> finalFileNames = [];
+
       if (existingRecord?.testFilePaths != null) {
-        finalFileUrls.addAll(existingRecord!.testFilePaths!);
+        finalFilePaths.addAll(existingRecord!.testFilePaths!);
       }
       if (existingRecord?.testFileNames != null) {
         finalFileNames.addAll(existingRecord!.testFileNames!);
       }
-      finalFileUrls.addAll(uploadedFileUrls);
-      finalFileNames.addAll(testFileNames);
 
       try {
+        // Upload new files to Supabase
+        for (int i = 0; i < testFilePaths.length; i++) {
+          final path = testFilePaths[i];
+          final name = testFileNames[i];
+
+          final url = await StorageService().uploadTestFile(path, name);
+
+          finalFilePaths.add(
+            url,
+          ); // store Supabase public URL instead of local path
+          finalFileNames.add(name);
+        }
+
         if (existingRecord != null) {
-          // Update existing record
           final updatedRecord = existingRecord!.copyWith(
             midwifeName: midwifeNameController.text.trim(),
             motherName: nameController.text.trim(),
@@ -226,7 +345,7 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                 ? null
                 : medicalHistoryController.text.trim(),
             testFileNames: finalFileNames,
-            testFilePaths: finalFileUrls,
+            testFilePaths: finalFilePaths,
             lastMenstrualPeriod: lmp,
             expectedDeliveryDate: edd,
             notes: notesController.text.trim().isEmpty
@@ -237,7 +356,6 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
 
           await _databaseService.updatePregnancyRecord(updatedRecord);
         } else {
-          // Create new record
           await _databaseService.addPregnancyRecord(
             midwifeName: midwifeNameController.text.trim(),
             motherName: nameController.text.trim(),
@@ -255,7 +373,7 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                 ? null
                 : medicalHistoryController.text.trim(),
             testFileNames: finalFileNames,
-            testFilePaths: finalFileUrls,
+            testFilePaths: finalFilePaths,
             lastMenstrualPeriod: lmp,
             expectedDeliveryDate: edd,
             notes: notesController.text.trim().isEmpty
@@ -265,6 +383,7 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
             patientId: widget.patientId,
           );
         }
+
         if (!mounted) return;
 
         ScaffoldMessenger.of(context).showSnackBar(
