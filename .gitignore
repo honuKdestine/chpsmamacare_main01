@@ -1,5 +1,6 @@
-# Miscellaneous
+# Misc
 *.class
+*.lock
 *.log
 *.pyc
 *.swp
@@ -9,81 +10,31 @@
 .buildlog/
 .history
 .svn/
-.swiftpm/
-migrate_working_dir/
-
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
 .idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+.vscode/
+.packages
 
 # Flutter/Dart/Pub related
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
 **/doc/api/
 **/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.pub-cache/
-.pub/
-/build/
+*.g.dart
+pubspec.lock
 
-# Symbolication related
-app.*.symbols
-
-# Obfuscation related
-app.*.map.json
-
-#android/java_pid3716.hprof
+# Android related
+android/.gradle/
+android/captures/
+android/gradle/
+android/app/build/
+*.jks
+*.keystore
 *.hprof
 
-
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-
-
-# Misc
-*.class
-*.lock
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.buildlog/
-.history
-.svn/
-.idea/
-.packages
-.pub-cache/
-.pub/
-.vscode/
-*.iml
-
-# Flutter/Dart/Pub related
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-.pub-cache/
-build/
-pubspec.lock
-
-# Android related
-android/.gradle/
-android/captures/
-android/gradle/
-android/app/build/
-*.jks
-*.keystore
-
 # iOS related
 ios/Flutter/Flutter.framework
 ios/Flutter/Flutter.podspec
@@ -92,8 +43,7 @@ ios/Flutter/engine/
 ios/Pods/
 ios/Runner/GeneratedPluginRegistrant.*
 ios/.symlinks/
-ios/Flutter/Generated.xcconfig
-ios/Flutter/Generated.xcconfig.d
+ios/Flutter/Generated.xcconfig*
 ios/Runner.xcodeproj/project.xcworkspace/
 ios/Runner.xcworkspace/
 xcuserdata/
@@ -116,76 +66,3 @@ linux/.dart_tool/
 
 # Coverage
 coverage/
-
-# Generated files
-*.g.dart
-# Misc
-*.class
-*.lock
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.buildlog/
-.history
-.svn/
-.idea/
-.packages
-.pub-cache/
-.pub/
-.vscode/
-*.iml
-
-# Flutter/Dart/Pub related
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-.pub-cache/
-build/
-pubspec.lock
-
-# Android related
-android/.gradle/
-android/captures/
-android/gradle/
-android/app/build/
-*.jks
-*.keystore
-
-# iOS related
-ios/Flutter/Flutter.framework
-ios/Flutter/Flutter.podspec
-ios/Flutter/App.framework
-ios/Flutter/engine/
-ios/Pods/
-ios/Runner/GeneratedPluginRegistrant.*
-ios/.symlinks/
-ios/Flutter/Generated.xcconfig
-ios/Flutter/Generated.xcconfig.d
-ios/Runner.xcodeproj/project.xcworkspace/
-ios/Runner.xcworkspace/
-xcuserdata/
-
-# Web related
-web/.dart_tool/
-
-# Windows related
-windows/.dart_tool/
-windows/runner/Debug/
-windows/runner/Release/
-windows/build/
-
-# macOS related
-macos/Flutter/ephemeral/
-macos/.dart_tool/
-
-# Linux related
-linux/.dart_tool/
-
-# Coverage
-coverage/
-
-# Generated files
-*.g.dart
