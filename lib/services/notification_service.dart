@@ -119,11 +119,12 @@ class NotificationService {
 
   void scheduleHealthTipNotifications() {
     final times = [
-      const TimeOfDay(hour: 11, minute: 30),
-      const TimeOfDay(hour: 12, minute: 10),
-      const TimeOfDay(hour: 12, minute: 30),
-      const TimeOfDay(hour: 1, minute: 10),
-      const TimeOfDay(hour: 1, minute: 30),
+      const TimeOfDay(hour: 8, minute: 15),
+      const TimeOfDay(hour: 11, minute: 15),
+      const TimeOfDay(hour: 14, minute: 15),
+      const TimeOfDay(hour: 14, minute: 45),
+      const TimeOfDay(hour: 17, minute: 15),
+      const TimeOfDay(hour: 20, minute: 15),
     ];
 
     // Randomize or rotate tips
@@ -143,174 +144,6 @@ class NotificationService {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-// import 'package:timezone/timezone.dart' as tz;
-// import 'package:timezone/data/latest.dart' as tz_data;
-// import 'package:flutter/material.dart';
-// // ignore: depend_on_referenced_packages
-// import 'package:chpsmamacare_main01/models/appointment.dart';
-// import 'package:chpsmamacare_main01/utils/health_tips.dart';
-// import 'package:permission_handler/permission_handler.dart';
-// import 'dart:math';
-
-// class NotificationService {
-//   static final NotificationService _instance = NotificationService._();
-//   static NotificationService get instance => _instance;
-
-//   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
-//       FlutterLocalNotificationsPlugin();
-
-//   NotificationService._();
-
-//   Future<void> initialize() async {
-//     tz_data.initializeTimeZones();
-
-//     const AndroidInitializationSettings androidSettings =
-//         AndroidInitializationSettings('@mipmap/ic_launcher');
-
-
-//     const DarwinInitializationSettings iosSettings =
-//         DarwinInitializationSettings(
-//           requestAlertPermission: true,
-//           requestBadgePermission: true,
-//           requestSoundPermission: true,
-//         );
-
-//     const InitializationSettings initSettings = InitializationSettings(
-//       android: androidSettings,
-//       iOS: iosSettings,
-//     );
-
-//     await _flutterLocalNotificationsPlugin.initialize(
-//       initSettings,
-//       onDidReceiveNotificationResponse: (NotificationResponse response) {
-//         debugPrint('Notification clicked: ${response.payload}');
-//         // Handle notification tap
-//       },
-//     );
-//   }
-
-//   //Request notification permissions
-//   Future<bool> requestPermissions() async {
-//     final status = await Permission.notification.status;
-
-//     if (status.isGranted) {
-//       return true;
-//     } else {
-//       final result = await Permission.notification.request();
-//       return result.isGranted;
-//     }
-//   }
-
-//   // Schedule daily health tip
-//   Future<void> scheduleDailyHealthTip({
-//     required TimeOfDay time,
-//     required int id,
-//   }) async {
-//     final random = Random();
-//     final healthTip = HealthTips.tips[random.nextInt(HealthTips.tips.length)];
-
-//     final now = DateTime.now();
-//     final scheduledTime = now.add(const Duration(minutes: 5));
-
-//     final androidDetails = AndroidNotificationDetails(
-//       'health_tips',
-//       'Maternal Health Notifications',
-//       channelDescription: 'Daily maternal health tips',
-//       importance: Importance.max,
-//       priority: Priority.high,
-//       playSound: true,
-//       sound: const RawResourceAndroidNotificationSound('mama_alert'),
-//       styleInformation: BigTextStyleInformation(
-//         '${healthTip.title}\n${healthTip.content}',
-//       ),
-//     );
-
-//     const iosDetails = DarwinNotificationDetails(
-//       //sound: 'notification_sound.aiff',
-//       presentAlert: true,
-//       presentBadge: true,
-//       presentSound: true,
-//     );
-
-//     final platformDetails = NotificationDetails(
-//       android: androidDetails,
-//       iOS: iosDetails,
-//     );
-
-//     try {
-//       await _flutterLocalNotificationsPlugin.zonedSchedule(
-//         id,
-//         'Maternal Health Tip',
-//         healthTip.title,
-//         tz.TZDateTime.from(scheduledTime, tz.local).add(Duration(minutes: 5)),
-//         platformDetails,
-//         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-//         payload: 'health_tip_${healthTip.id}',
-//         matchDateTimeComponents: DateTimeComponents.time,
-//       );
-//       debugPrint('✅ Notification scheduled successfully');
-//     } catch (e, stack) {
-//       debugPrint('❌ Failed to schedule notification: $e');
-//       debugPrint(stack.toString());
-//     }
-//   }
-
-//   Future<void> scheduleFiveDailyTips() async {
-//     final times = [
-//       TimeOfDay(hour: 9, minute: 00),
-//       TimeOfDay(hour: 9, minute: 10),
-//       TimeOfDay(hour: 9, minute: 20),
-//       TimeOfDay(hour: 9, minute: 30),
-//       TimeOfDay(hour: 9, minute: 35),
-//     ];
-
-//     for (int i = 0; i < times.length; i++) {
-//       await scheduleDailyHealthTip(time: times[i], id: 100 + i);
-//     }
-//   }
 
 //   // Schedule appointment reminder
 //   Future<void> scheduleAppointmentReminder(Appointment appointment) async {

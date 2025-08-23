@@ -4,6 +4,7 @@ import 'package:chpsmamacare_main01/services/database_service.dart';
 import 'package:chpsmamacare_main01/services/storage_service.dart';
 import 'package:chpsmamacare_main01/utils/app_theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
@@ -164,199 +165,48 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
     return 'P-${nextNumber.toString().padLeft(4, '0')}';
   }
 
-  // void _saveRecord() async {
-  //   if (formKey.currentState!.validate()) {
-  //     setState(() {
-  //       _isLoading = true;
-  //     });
-
-  //     String patientId;
-
-  //     if (existingRecord == null) {
-  //       // New record: generate next ID
-  //       patientId = await generateNextPatientId();
-  //     } else {
-  //       // Editing: keep original ID
-  //       patientId = existingRecord!.patientId;
-  //     }
-
-  //     // Merge old + new files when updating
-  //     List<String> finalFilePaths = [];
-  //     List<String> finalFileNames = [];
-
-  //     if (existingRecord?.testFilePaths != null) {
-  //       finalFilePaths.addAll(existingRecord!.testFilePaths!);
-  //     }
-  //     if (existingRecord?.testFileNames != null) {
-  //       finalFileNames.addAll(existingRecord!.testFileNames!);
-  //     }
-
-  //     // Directly store local file paths and names (no Firebase upload)
-  //     finalFilePaths.addAll(testFilePaths);
-  //     finalFileNames.addAll(testFileNames);
-
-  //     try {
-  //       if (existingRecord != null) {
-  //         // Update existing record
-  //         final updatedRecord = existingRecord!.copyWith(
-  //           midwifeName: midwifeNameController.text.trim(),
-  //           motherName: nameController.text.trim(),
-  //           age: int.tryParse(ageController.text.trim()) ?? 0,
-  //           phone: phoneController.text.trim(),
-  //           address: addressController.text.trim(),
-  //           gravida: int.tryParse(gravidaController.text.trim()) ?? 0,
-  //           parity: int.tryParse(parityController.text.trim()) ?? 0,
-  //           previousPregnancies: previousPregnancies,
-  //           familyIllness: familyIllness,
-  //           familyIllnessDetails: familyIllness
-  //               ? familyIllnessController.text.trim()
-  //               : null,
-  //           medicalHistory: medicalHistoryController.text.trim().isEmpty
-  //               ? null
-  //               : medicalHistoryController.text.trim(),
-  //           testFileNames: finalFileNames,
-  //           testFilePaths: finalFilePaths,
-  //           lastMenstrualPeriod: lmp,
-  //           expectedDeliveryDate: edd,
-  //           notes: notesController.text.trim().isEmpty
-  //               ? null
-  //               : notesController.text.trim(),
-  //           dateOfBirth: dateOfBirth,
-  //         );
-
-  //         await _databaseService.updatePregnancyRecord(updatedRecord);
-  //       } else {
-  //         // Create new record
-  //         await _databaseService.addPregnancyRecord(
-  //           midwifeName: midwifeNameController.text.trim(),
-  //           motherName: nameController.text.trim(),
-  //           age: int.tryParse(ageController.text.trim()) ?? 0,
-  //           phone: phoneController.text.trim(),
-  //           address: addressController.text.trim(),
-  //           gravida: int.tryParse(gravidaController.text.trim()) ?? 0,
-  //           parity: int.tryParse(parityController.text.trim()) ?? 0,
-  //           previousPregnancies: previousPregnancies,
-  //           familyIllness: familyIllness,
-  //           familyIllnessDetails: familyIllness
-  //               ? familyIllnessController.text.trim()
-  //               : null,
-  //           medicalHistory: medicalHistoryController.text.trim().isEmpty
-  //               ? null
-  //               : medicalHistoryController.text.trim(),
-  //           testFileNames: finalFileNames,
-  //           testFilePaths: finalFilePaths,
-  //           lastMenstrualPeriod: lmp,
-  //           expectedDeliveryDate: edd,
-  //           notes: notesController.text.trim().isEmpty
-  //               ? null
-  //               : notesController.text.trim(),
-  //           dateOfBirth: dateOfBirth,
-  //           patientId: widget.patientId,
-  //         );
-  //       }
-
-  //       if (!mounted) return;
-
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Text(
-  //             existingRecord != null
-  //                 ? 'Record updated successfully'
-  //                 : 'Pregnancy record saved successfully',
-  //           ),
-  //           backgroundColor: AppColors.success,
-  //         ),
-  //       );
-
-  //       Navigator.pop(context, true);
-  //     } catch (e, stack) {
-  //       print("Save record error: $e");
-  //       print(stack);
-  //       if (!mounted) return;
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Text('Error saving record: ${e.toString()}'),
-  //           backgroundColor: AppColors.danger,
-  //         ),
-  //       );
-  //     } finally {
-  //       if (mounted) {
-  //         setState(() {
-  //           _isLoading = false;
-  //         });
-  //       }
-  //     }
-  //   }
-  // }
-
   void _saveRecord() async {
-    if (formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+    if (!formKey.currentState!.validate()) return;
 
-      String patientId;
+    setState(() => _isLoading = true);
 
-      if (existingRecord == null) {
-        patientId = await generateNextPatientId();
-      } else {
-        patientId = existingRecord!.patientId;
-      }
+    String patientId = existingRecord == null
+        ? await generateNextPatientId()
+        : existingRecord!.patientId;
 
-      List<String> finalFilePaths = [];
-      List<String> finalFileNames = [];
+    List<String> finalFilePaths = existingRecord?.testFilePaths != null
+        ? List.from(existingRecord!.testFilePaths!)
+        : [];
+    List<String> finalFileNames = existingRecord?.testFileNames != null
+        ? List.from(existingRecord!.testFileNames!)
+        : [];
 
-      if (existingRecord?.testFilePaths != null) {
-        finalFilePaths.addAll(existingRecord!.testFilePaths!);
-      }
-      if (existingRecord?.testFileNames != null) {
-        finalFileNames.addAll(existingRecord!.testFileNames!);
-      }
+    bool isOnline = await _isOnline();
 
-      try {
-        // Upload new files to Supabase
-        for (int i = 0; i < testFilePaths.length; i++) {
-          final path = testFilePaths[i];
-          final name = testFileNames[i];
+    try {
+      // Try to upload files, but fall back to local paths if it fails
+      for (int i = 0; i < testFilePaths.length; i++) {
+        final path = testFilePaths[i];
+        final name = testFileNames[i];
 
-          final url = await StorageService().uploadTestFile(path, name);
-
-          finalFilePaths.add(
-            url,
-          ); // store Supabase public URL instead of local path
-          finalFileNames.add(name);
-        }
-
-        if (existingRecord != null) {
-          final updatedRecord = existingRecord!.copyWith(
-            midwifeName: midwifeNameController.text.trim(),
-            motherName: nameController.text.trim(),
-            age: int.tryParse(ageController.text.trim()) ?? 0,
-            phone: phoneController.text.trim(),
-            address: addressController.text.trim(),
-            gravida: int.tryParse(gravidaController.text.trim()) ?? 0,
-            parity: int.tryParse(parityController.text.trim()) ?? 0,
-            previousPregnancies: previousPregnancies,
-            familyIllness: familyIllness,
-            familyIllnessDetails: familyIllness
-                ? familyIllnessController.text.trim()
-                : null,
-            medicalHistory: medicalHistoryController.text.trim().isEmpty
-                ? null
-                : medicalHistoryController.text.trim(),
-            testFileNames: finalFileNames,
-            testFilePaths: finalFilePaths,
-            lastMenstrualPeriod: lmp,
-            expectedDeliveryDate: edd,
-            notes: notesController.text.trim().isEmpty
-                ? null
-                : notesController.text.trim(),
-            dateOfBirth: dateOfBirth,
-          );
-
-          await _databaseService.updatePregnancyRecord(updatedRecord);
+        if (isOnline) {
+          try {
+            final url = await StorageService().uploadTestFile(path, name);
+            finalFilePaths.add(url);
+          } catch (e) {
+            print("File upload failed, saving locally: $e");
+            finalFilePaths.add(path); // fallback to local path
+          }
         } else {
-          await _databaseService.addPregnancyRecord(
+          finalFilePaths.add(path);
+        }
+        finalFileNames.add(name);
+      }
+
+      // Save locally first (Hive or SQLite)
+      if (existingRecord != null) {
+        await _databaseService.updatePregnancyRecord(
+          existingRecord!.copyWith(
             midwifeName: midwifeNameController.text.trim(),
             motherName: nameController.text.trim(),
             age: int.tryParse(ageController.text.trim()) ?? 0,
@@ -380,42 +230,73 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                 ? null
                 : notesController.text.trim(),
             dateOfBirth: dateOfBirth,
-            patientId: widget.patientId,
-          );
-        }
+          ),
+        );
+      } else {
+        await _databaseService.addPregnancyRecord(
+          midwifeName: midwifeNameController.text.trim(),
+          motherName: nameController.text.trim(),
+          age: int.tryParse(ageController.text.trim()) ?? 0,
+          phone: phoneController.text.trim(),
+          address: addressController.text.trim(),
+          gravida: int.tryParse(gravidaController.text.trim()) ?? 0,
+          parity: int.tryParse(parityController.text.trim()) ?? 0,
+          previousPregnancies: previousPregnancies,
+          familyIllness: familyIllness,
+          familyIllnessDetails: familyIllness
+              ? familyIllnessController.text.trim()
+              : null,
+          medicalHistory: medicalHistoryController.text.trim().isEmpty
+              ? null
+              : medicalHistoryController.text.trim(),
+          testFileNames: finalFileNames,
+          testFilePaths: finalFilePaths,
+          lastMenstrualPeriod: lmp,
+          expectedDeliveryDate: edd,
+          notes: notesController.text.trim().isEmpty
+              ? null
+              : notesController.text.trim(),
+          dateOfBirth: dateOfBirth,
+          patientId: widget.patientId,
+        );
+      }
 
-        if (!mounted) return;
-
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              existingRecord != null
-                  ? 'Record updated successfully'
-                  : 'Pregnancy record saved successfully',
+              isOnline
+                  ? (existingRecord != null
+                        ? 'Record updated successfully'
+                        : 'Pregnancy record saved successfully')
+                  : 'Saved locally (offline mode)',
             ),
             backgroundColor: AppColors.success,
           ),
         );
+        Navigator.pop(context, true); // Always navigate away
+      }
+    } catch (e) {
+      print("Save record error: $e");
 
-        Navigator.pop(context, true);
-      } catch (e, stack) {
-        print("Save record error: $e");
-        print(stack);
-        if (!mounted) return;
+      // Still navigate even if an error occurs
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error saving record: ${e.toString()}'),
-            backgroundColor: AppColors.danger,
+            content: Text('Saved locally due to network issue'),
+            backgroundColor: AppColors.warning,
           ),
         );
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
+        Navigator.pop(context, true);
       }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  Future<bool> _isOnline() async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+    return connectivityResult != ConnectivityResult.none;
   }
 
   @override

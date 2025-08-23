@@ -66,6 +66,9 @@ class PregnancyRecord extends HiveObject {
   @HiveField(20)
   DateTime? dateOfBirth;
 
+  @HiveField(21)
+  bool pendingSync;
+
   PregnancyRecord({
     required this.id,
     required this.midwifeName,
@@ -89,6 +92,7 @@ class PregnancyRecord extends HiveObject {
     List<CheckupRecord>? checkups,
     DateTime? createdAt,
     String? testFileUrl,
+    this.pendingSync = false,
   }) : checkups = checkups ?? [],
        createdAt = createdAt ?? DateTime.now();
 

@@ -3,6 +3,7 @@ import 'package:chpsmamacare_main01/models/emergency_contact.dart';
 import 'package:chpsmamacare_main01/models/pregnancy_record.dart';
 import 'package:chpsmamacare_main01/screens/animated_splash_screen.dart';
 import 'package:chpsmamacare_main01/services/notification_service.dart';
+// import 'package:chpsmamacare_main01/services/sync_service.dart';
 import 'package:chpsmamacare_main01/utils/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -110,7 +111,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'CHPS MamaCare',
+      title: 'CHPS MaMaCare',
       debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
       theme: AppTheme.lightTheme,
