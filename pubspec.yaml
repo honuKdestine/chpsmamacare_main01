@@ -57,6 +57,7 @@ dependencies:
   firebase_storage: ^12.4.10
   path: ^1.9.1
   supabase_flutter: ^2.9.1
+  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.4

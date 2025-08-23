@@ -15,6 +15,7 @@ import 'firebase_options.dart';
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -25,9 +26,8 @@ void main() async {
 
   //Initialize supabase for file storage
   await Supabase.initialize(
-    url: 'https://waxqtylfloptvclkmdvh.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndheHF0eWxmbG9wdHZjbGttZHZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMDUyMDcsImV4cCI6MjA3MDc4MTIwN30.w4lla44Y5Qhre-htNI3ClCE9R884bkGzegoz_sUHuTc',
+    url: dotenv.env['SUPABASE_URL']!,
+    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
 
   // Enable offline sync
