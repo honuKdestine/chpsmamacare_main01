@@ -1,21 +1,43 @@
-# chpsmamacare_main01
+# CHPS Mamacare
 
-A new Flutter project.
+A Flutter application developed as a Level 300 mini-project (August 2025) to support Community-based Health Planning and Services (CHPS).
 
-## Getting Started
+## 🚀 Features
 
-This project is a starting point for a Flutter application.
+- **User authentication** with Firebase
+- **Health record management** (births, immunisations, visits)
+- **Photo uploads** and multimedia support
+- **Offline-first design** with local storage
+- **Responsive UI** for Android, iOS, web and desktop
+- Modular structure: models, screens, services, widgets
 
-A few resources to get you started if this is your first Flutter project:
+## 🗂 Project Structure
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```
+lib/
+  firebase_options.dart
+  main.dart
+  models/
+  screens/
+  services/
+  utils/
+  widgets/
+test/
+web/
+android/… ios/… windows/…
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🛠 Setup
 
----
+1. Clone the repo.
+2. Run `flutter pub get`.
+3. Configure Firebase (use `google-services.json` and `GoogleService-Info.plist`).
+4. Launch with `flutter run` on your target platform.
+
+## 📝 Notes
+
+Built as part of a course requirement; demonstrates Flutter, Firebase, and cross-platform development fundamentals.
+
 
 ## Environment Keys
 
